@@ -291,6 +291,35 @@ input:focus {
   font-size: 0.85rem;
 }
 
+.personality-profile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.profile-card {
+  background: #0f0c1a;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+}
+
+.profile-card h3 {
+  margin: 0 0 0.3rem;
+  font-size: 0.85rem;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.profile-card p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
 .wheel-container {
   display: flex;
   justify-content: center;

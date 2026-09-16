@@ -4,6 +4,7 @@ import { attachDateMask, attachTimeMask, parseEuropeanDate, parseTime } from "./
 import { saveFormData, loadFormData } from "./storage.js";
 import { renderChartWheel } from "./chart-wheel.js";
 import { generateInterpretations } from "./interpretations.js";
+import { buildPersonalityProfile } from "./sign-meanings.js";
 
 const form = document.querySelector("#chart-form");
 const resultsSection = document.querySelector("#results");
@@ -12,6 +13,8 @@ const womanChartEl = document.querySelector("#woman-chart");
 const manChartEl = document.querySelector("#man-chart");
 const womanWheelEl = document.querySelector("#woman-wheel");
 const manWheelEl = document.querySelector("#man-wheel");
+const womanProfileEl = document.querySelector("#woman-profile");
+const manProfileEl = document.querySelector("#man-profile");
 const connectionsEl = document.querySelector("#connections");
 const womanHeading = document.querySelector("#woman-heading");
 const manHeading = document.querySelector("#man-heading");
@@ -103,6 +106,9 @@ function tryCompute({ silent }) {
   manWheelEl.innerHTML = "";
   manWheelEl.appendChild(renderChartWheel(manPoints, MAN_ACCENT));
 
+  renderProfile(womanProfileEl, buildPersonalityProfile(womanPoints));
+  renderProfile(manProfileEl, buildPersonalityProfile(manPoints));
+
   const aspectMatches = computeSynastry(womanPoints, manPoints);
   const signMatches = sameSignMatches(womanPoints, manPoints);
   renderConnections(aspectMatches, signMatches);
@@ -152,6 +158,27 @@ function renderPoints(container, points) {
     `;
     container.appendChild(row);
   }
+}
+
+function renderProfile(container, profile) {
+  container.innerHTML = "";
+  if (!profile.sunSign || !profile.ascendantSign) return;
+
+  const sunCard = document.createElement("div");
+  sunCard.className = "profile-card";
+  sunCard.innerHTML = `
+    <h3>Sun in ${capitalize(profile.sunSign)}</h3>
+    <p>${profile.sunText}</p>
+  `;
+  container.appendChild(sunCard);
+
+  const ascCard = document.createElement("div");
+  ascCard.className = "profile-card";
+  ascCard.innerHTML = `
+    <h3>Ascendant in ${capitalize(profile.ascendantSign)}</h3>
+    <p>${profile.ascendantText}</p>
+  `;
+  container.appendChild(ascCard);
 }
 
 function renderConnections(aspectMatches, signMatches) {

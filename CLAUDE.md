@@ -57,6 +57,12 @@ There is no test suite or linter configured yet.
   `* 11` multiplier if the spread drifts, not by changing the clamp bounds.
   This is where to add/adjust the meaning of a given planet or aspect combination —
   keep the astrology math itself in `astro.js`.
+- `src/sign-meanings.js` — per-person (not synastry) personality text: `SUN_TRAITS` and
+  `ASCENDANT_TRAITS` are flat sign → blurb dictionaries; `buildPersonalityProfile(points)`
+  pulls the `sun` and `ascendant` entries out of a single chart's `extractPoints()` array.
+  Rendered as two cards ("Sun in X" / "Ascendant in Y") above each person's planet list —
+  this is each individual's own horoscope/rising-sign read, separate from the synastry
+  reading in `interpretations.js`.
 - `src/date-format.js` — European date (DD/MM/YYYY) and 24h time (HH:MM) input
   handling: typing masks (auto-inserts `/` and `:`) plus parse/format functions. Birth
   date/time fields are plain `<input type="text">`, not `<input type="date">`/`type="time"`,

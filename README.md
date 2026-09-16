@@ -5,9 +5,10 @@ horoscopes) of a woman and a man side by side, and highlights the
 astrological connections (aspects and sign matches) between them.
 
 Enter each person's date (DD/MM/YYYY), time (24h, HH:MM), and place
-(latitude/longitude) of birth. The woman's chart wheel and planet
-positions render on the left, the man's on the right, and the middle
-column lists the raw connections found between the two charts —
+(latitude/longitude) of birth. The woman's chart wheel, individual
+personality profile (Sun sign and Ascendant), and planet positions
+render on the left, the man's on the right, and the middle column
+lists the raw connections found between the two charts —
 cross-chart aspects (conjunction, sextile, square, trine, opposition)
 and same-sign matches. Below that, a "Compatibility Reading" section
 translates those connections into plain-language notes on human
