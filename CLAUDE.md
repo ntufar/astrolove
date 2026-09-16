@@ -4,10 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-AstroLove is a static, client-side-only web page. Users enter birth date/time/coordinates
-for a woman and a man; the page computes both natal charts and the astrological
-connections (aspects, same-sign matches) between them, entirely in the browser. There is
-no backend and no birth data ever leaves the client.
+AstroLove is a static, client-side-only web page. Users enter birth date/time and a
+Greek birth city (chosen from a fixed dropdown list — see `src/greek-cities.js`) for a
+woman and a man; the page computes both natal charts, the astrological connections
+(aspects, same-sign matches) between them, and per-person daily/weekly transit
+predictions, entirely in the browser. There is no backend and no birth data ever leaves
+the client.
 
 ## Commands
 
@@ -38,6 +40,26 @@ There is no test suite or linter configured yet.
     and returns matches sorted by exactness (closest to exact angle first).
   - `sameSignMatches(pointsA, pointsB)` is a simpler secondary connection type (same
     zodiac sign on both charts), rendered as a fallback/supplement to aspect matches.
+- `src/greek-cities.js` — the fixed `GREEK_CITIES` list (`{ name, latitude, longitude }`)
+  that backs both birth-city `<select>`s. Coordinates are looked up from here instead of
+  being typed in — there is no free-form lat/lon input anymore. Add a city by appending
+  an entry; keep it alphabetically sorted since it's rendered straight into the dropdown.
+- `src/transits.js` — transit math: where the planets are *today* (or across the next 7
+  days) relative to a natal chart. Reuses `buildChart`/`extractPoints`/`computeSynastry`
+  from `astro.js` unchanged — `computeSynastry` is generic cross-chart aspect matching,
+  so transit-vs-natal is just another pair of point arrays to it. `computeDayTransits`
+  samples the current moment; `computeWeekTransits` samples once per day at noon for the
+  next 7 days and keeps, per (transiting point, aspect, natal point) triple, only the
+  tightest (most exact) occurrence across the week. Uses the person's birth-city
+  coordinates as the sampling location — plausible enough since location barely affects
+  planetary ecliptic longitude (it's dropped from the transit ascendant, which *is*
+  location-sensitive and not meaningful for a transit reading anyway).
+- `src/predictions.js` — the meaning layer for `transits.js`, parallel to how
+  `interpretations.js` is the meaning layer for synastry: `generateDayPrediction`/
+  `generateWeekPrediction` turn transit matches into `{ summary, items }` with
+  human-readable sentences (`TRANSIT_THEME` per transiting planet, `ASPECT_VERB`/
+  `TONE_NOTE` for phrasing). This is where to adjust prediction wording; keep the transit
+  math itself in `transits.js`.
 - `src/chart-wheel.js` — renders a circular natal chart (zodiac ring, sign glyphs,
   ascendant/descendant axis, planet glyphs placed by ecliptic degree) as an inline SVG
   built with `document.createElementNS`, not a template string. `pickFreeRing` does
@@ -67,17 +89,21 @@ There is no test suite or linter configured yet.
   handling: typing masks (auto-inserts `/` and `:`) plus parse/format functions. Birth
   date/time fields are plain `<input type="text">`, not `<input type="date">`/`type="time"`,
   specifically so the displayed format doesn't follow the browser/OS locale.
-- `src/storage.js` — persists both people's form fields to `localStorage`
-  (`astrolove:form:v1`) on submit and pre-fills them on load; `main.js`'s `init()`
-  auto-computes and shows results on load if a full pre-filled pair is present. No
-  network calls are involved — this is purely `localStorage`.
-- `src/main.js` — DOM wiring only: reads the two birth-data forms, calls into
-  `astro.js`/`chart-wheel.js`/`interpretations.js`, and renders the chart columns, the
-  raw "Connections" list, and the "Compatibility Reading" section. Keep astrology math
-  out of this file; keep DOM manipulation out of `astro.js`.
+- `src/storage.js` — persists both people's form fields (name, date, time, **city**) to
+  `localStorage` (`astrolove:form:v1`) on submit and pre-fills them on load; `main.js`'s
+  `init()` auto-computes and shows results on load if a full pre-filled pair is present.
+  No network calls are involved — this is purely `localStorage`.
+- `src/main.js` — DOM wiring only: populates the two city `<select>`s from
+  `GREEK_CITIES`, reads the two birth-data forms, calls into
+  `astro.js`/`chart-wheel.js`/`interpretations.js`/`transits.js`/`predictions.js`, and
+  renders the chart columns, the raw "Connections" list, the "Compatibility Reading"
+  section, and the "Personal Predictions" section (day/week forecast per person). Keep
+  astrology math out of this file; keep DOM manipulation out of `astro.js`/`transits.js`.
 - `index.html` / `src/style.css` — three-column results layout (woman | connections |
-  man) above a full-width "Compatibility Reading" section, with a woman/man accent
-  color pair used consistently across form panels, chart columns, and wheel glyphs.
+  man) above a full-width "Compatibility Reading" section and a full-width "Personal
+  Predictions" section (woman | man columns, each with a Today block and a This Week
+  block), with a woman/man accent color pair used consistently across form panels, chart
+  columns, prediction columns, and wheel glyphs.
 
 ## Theming
 
@@ -96,7 +122,8 @@ per-person glyph color is themed via CSS classes (`wheel-point-glyph--woman`/`--
 
 - Import from the package root: `import { Origin, Horoscope } from "circular-natal-horoscope-js"`.
 - `Origin` months are 0-indexed (January = 0).
-- Latitude/longitude are required inputs from the user; the library derives timezone and
+- Latitude/longitude come from the selected `GREEK_CITIES` entry (see
+  `src/greek-cities.js`), not free-form user input; the library derives timezone and
   historical DST from them, so do not add a separate timezone field.
 - Useful result shapes: `horoscope.CelestialBodies.<key>` (sun, moon, mercury, venus,
   mars, jupiter, saturn, uranus, neptune, pluto — plus chiron/sirius, unused here),

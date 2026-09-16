@@ -39,17 +39,10 @@
             Time of birth (24h, HH:MM)
             <input type="text" name="woman-time" inputmode="numeric" placeholder="14:30" maxlength="5" required />
           </label>
-          <div class="coord-row">
-            <label>
-              Latitude
-              <input type="number" name="woman-lat" step="0.0001" min="-90" max="90" placeholder="40.7128" required />
-            </label>
-            <label>
-              Longitude
-              <input type="number" name="woman-lon" step="0.0001" min="-180" max="180" placeholder="-74.0060" required />
-            </label>
-          </div>
-          <button type="button" class="locate-btn" data-target="woman">Use birthplace coordinates from browser</button>
+          <label>
+            City of birth
+            <select name="woman-city" id="woman-city" required></select>
+          </label>
         </div>
 
         <div class="person-panel person-panel--man">
@@ -66,27 +59,18 @@
             Time of birth (24h, HH:MM)
             <input type="text" name="man-time" inputmode="numeric" placeholder="09:00" maxlength="5" required />
           </label>
-          <div class="coord-row">
-            <label>
-              Latitude
-              <input type="number" name="man-lat" step="0.0001" min="-90" max="90" placeholder="34.0522" required />
-            </label>
-            <label>
-              Longitude
-              <input type="number" name="man-lon" step="0.0001" min="-180" max="180" placeholder="-118.2437" required />
-            </label>
-          </div>
-          <button type="button" class="locate-btn" data-target="man">Use birthplace coordinates from browser</button>
+          <label>
+            City of birth
+            <select name="man-city" id="man-city" required></select>
+          </label>
         </div>
 
         <button type="submit" class="submit-btn">Calculate charts &amp; connections</button>
       </form>
 
       <p class="coord-hint">
-        Tip: don't know exact coordinates? Look up the birth city's latitude/longitude
-        (e.g. search "&lt;city&gt; latitude longitude") and enter it above — this app
-        performs all astrology math locally in your browser, so no birth data ever
-        leaves your device.
+        Birthplace is limited to Greek cities for now. This app performs all astrology
+        math locally in your browser, so no birth data ever leaves your device.
       </p>
 
       <section id="results" class="results" hidden>
@@ -132,6 +116,39 @@
           <div class="reading-block">
             <h3>Family &amp; Long-Term Life</h3>
             <div id="reading-family" class="reading-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="predictions" class="predictions" hidden>
+        <h2>Personal Predictions</h2>
+        <div class="predictions-grid">
+          <div class="prediction-column prediction-column--woman">
+            <h3 id="woman-prediction-heading">Woman's Forecast</h3>
+            <div class="prediction-block">
+              <h4>Today</h4>
+              <p id="woman-prediction-day-summary" class="prediction-summary"></p>
+              <div id="woman-prediction-day" class="prediction-list"></div>
+            </div>
+            <div class="prediction-block">
+              <h4>This Week</h4>
+              <p id="woman-prediction-week-summary" class="prediction-summary"></p>
+              <div id="woman-prediction-week" class="prediction-list"></div>
+            </div>
+          </div>
+
+          <div class="prediction-column prediction-column--man">
+            <h3 id="man-prediction-heading">Man's Forecast</h3>
+            <div class="prediction-block">
+              <h4>Today</h4>
+              <p id="man-prediction-day-summary" class="prediction-summary"></p>
+              <div id="man-prediction-day" class="prediction-list"></div>
+            </div>
+            <div class="prediction-block">
+              <h4>This Week</h4>
+              <p id="man-prediction-week-summary" class="prediction-summary"></p>
+              <div id="man-prediction-week" class="prediction-list"></div>
+            </div>
           </div>
         </div>
       </section>

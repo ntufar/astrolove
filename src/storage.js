@@ -3,7 +3,7 @@
 
 const STORAGE_KEY = "astrolove:form:v1";
 
-const FIELDS = ["name", "date", "time", "lat", "lon"];
+const FIELDS = ["name", "date", "time", "city"];
 
 export function saveFormData(form) {
   const data = { woman: {}, man: {} };

@@ -5,10 +5,14 @@ import { saveFormData, loadFormData } from "./storage.js";
 import { renderChartWheel } from "./chart-wheel.js";
 import { generateInterpretations } from "./interpretations.js";
 import { buildPersonalityProfile } from "./sign-meanings.js";
+import { GREEK_CITIES } from "./greek-cities.js";
+import { computeDayTransits, computeWeekTransits } from "./transits.js";
+import { generateDayPrediction, generateWeekPrediction } from "./predictions.js";
 
 const form = document.querySelector("#chart-form");
 const resultsSection = document.querySelector("#results");
 const readingSection = document.querySelector("#reading");
+const predictionsSection = document.querySelector("#predictions");
 const womanChartEl = document.querySelector("#woman-chart");
 const manChartEl = document.querySelector("#man-chart");
 const womanWheelEl = document.querySelector("#woman-wheel");
@@ -24,6 +28,16 @@ const compatibilityLabelEl = document.querySelector("#compatibility-label");
 const readingConnectionEl = document.querySelector("#reading-connection");
 const readingLoveEl = document.querySelector("#reading-love");
 const readingFamilyEl = document.querySelector("#reading-family");
+const womanPredictionHeading = document.querySelector("#woman-prediction-heading");
+const manPredictionHeading = document.querySelector("#man-prediction-heading");
+const womanPredictionDaySummaryEl = document.querySelector("#woman-prediction-day-summary");
+const womanPredictionDayEl = document.querySelector("#woman-prediction-day");
+const womanPredictionWeekSummaryEl = document.querySelector("#woman-prediction-week-summary");
+const womanPredictionWeekEl = document.querySelector("#woman-prediction-week");
+const manPredictionDaySummaryEl = document.querySelector("#man-prediction-day-summary");
+const manPredictionDayEl = document.querySelector("#man-prediction-day");
+const manPredictionWeekSummaryEl = document.querySelector("#man-prediction-week-summary");
+const manPredictionWeekEl = document.querySelector("#man-prediction-week");
 
 const THEME_STORAGE_KEY = "astrolove:theme";
 const themeToggleBtn = document.querySelector("#theme-toggle");
@@ -57,9 +71,8 @@ function initTheme() {
 form.querySelectorAll('input[name$="-date"]').forEach(attachDateMask);
 form.querySelectorAll('input[name$="-time"]').forEach(attachTimeMask);
 
-document.querySelectorAll(".locate-btn").forEach((btn) => {
-  btn.addEventListener("click", () => handleLocate(btn.dataset.target));
-});
+populateCitySelect(document.querySelector("#woman-city"));
+populateCitySelect(document.querySelector("#man-city"));
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -73,23 +86,18 @@ function init() {
   if (filled && tryCompute({ silent: true })) {
     resultsSection.hidden = false;
     readingSection.hidden = false;
+    predictionsSection.hidden = false;
   }
 }
 
-function handleLocate(target) {
-  if (!navigator.geolocation) {
-    alert("Geolocation isn't available in this browser. Please enter coordinates manually.");
-    return;
+function populateCitySelect(select) {
+  select.innerHTML = '<option value="" disabled selected>Choose a city…</option>';
+  for (const city of GREEK_CITIES) {
+    const option = document.createElement("option");
+    option.value = city.name;
+    option.textContent = city.name;
+    select.appendChild(option);
   }
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      form.querySelector(`[name="${target}-lat"]`).value = position.coords.latitude.toFixed(4);
-      form.querySelector(`[name="${target}-lon"]`).value = position.coords.longitude.toFixed(4);
-    },
-    () => {
-      alert("Couldn't get your location. Please enter coordinates manually.");
-    },
-  );
 }
 
 function handleSubmit() {
@@ -99,6 +107,7 @@ function handleSubmit() {
   saveFormData(form);
   resultsSection.hidden = false;
   readingSection.hidden = false;
+  predictionsSection.hidden = false;
   resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -110,7 +119,7 @@ function tryCompute({ silent }) {
 
   if (!woman || !man) {
     if (!silent) {
-      alert("Please fill in a complete date (DD/MM/YYYY), time (HH:MM), and coordinates for both people.");
+      alert("Please fill in a complete date (DD/MM/YYYY), time (HH:MM), and city of birth for both people.");
     }
     return false;
   }
@@ -140,33 +149,63 @@ function tryCompute({ silent }) {
   renderConnections(aspectMatches, signMatches);
   renderReading(aspectMatches, signMatches);
 
+  womanPredictionHeading.textContent = woman.name ? `${woman.name}'s Forecast` : "Woman's Forecast";
+  manPredictionHeading.textContent = man.name ? `${man.name}'s Forecast` : "Man's Forecast";
+  renderPredictions(womanPoints, woman.location, womanPredictionDaySummaryEl, womanPredictionDayEl, womanPredictionWeekSummaryEl, womanPredictionWeekEl);
+  renderPredictions(manPoints, man.location, manPredictionDaySummaryEl, manPredictionDayEl, manPredictionWeekSummaryEl, manPredictionWeekEl);
+
   return true;
+}
+
+function renderPredictions(natalPoints, location, daySummaryEl, dayListEl, weekSummaryEl, weekListEl) {
+  const dayMatches = computeDayTransits(natalPoints, location);
+  const weekMatches = computeWeekTransits(natalPoints, location);
+
+  const dayPrediction = generateDayPrediction(dayMatches);
+  const weekPrediction = generateWeekPrediction(weekMatches);
+
+  daySummaryEl.textContent = dayPrediction.summary;
+  renderPredictionList(dayListEl, dayPrediction.items);
+
+  weekSummaryEl.textContent = weekPrediction.summary;
+  renderPredictionList(weekListEl, weekPrediction.items);
+}
+
+function renderPredictionList(container, items) {
+  container.innerHTML = "";
+  for (const item of items) {
+    const card = document.createElement("div");
+    card.className = `prediction-card tone-${item.tone}`;
+    card.textContent = item.sentence;
+    container.appendChild(card);
+  }
 }
 
 function readPerson(formData, prefix) {
   const dateStr = formData.get(`${prefix}-date`);
   const timeStr = formData.get(`${prefix}-time`);
-  const lat = parseFloat(formData.get(`${prefix}-lat`));
-  const lon = parseFloat(formData.get(`${prefix}-lon`));
+  const cityName = formData.get(`${prefix}-city`);
   const name = (formData.get(`${prefix}-name`) || "").trim();
 
   const date = parseEuropeanDate(dateStr);
   const time = parseTime(timeStr);
+  const city = GREEK_CITIES.find((c) => c.name === cityName);
 
-  if (!date || !time || Number.isNaN(lat) || Number.isNaN(lon)) {
+  if (!date || !time || !city) {
     return null;
   }
 
   return {
     name,
+    location: { latitude: city.latitude, longitude: city.longitude },
     origin: {
       year: date.year,
       month: date.month,
       date: date.day,
       hour: time.hour,
       minute: time.minute,
-      latitude: lat,
-      longitude: lon,
+      latitude: city.latitude,
+      longitude: city.longitude,
     },
   };
 }
