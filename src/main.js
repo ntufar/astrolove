@@ -5,9 +5,10 @@ import { saveFormData, loadFormData } from "./storage.js";
 import { renderChartWheel } from "./chart-wheel.js";
 import { generateInterpretations } from "./interpretations.js";
 import { buildPersonalityProfile } from "./sign-meanings.js";
-import { GREEK_CITIES } from "./greek-cities.js";
+import { GREEK_CITIES, cityDisplayName } from "./greek-cities.js";
 import { computeDayTransits, computeWeekTransits } from "./transits.js";
 import { generateDayPrediction, generateWeekPrediction } from "./predictions.js";
+import { getLang, setLang, ui, signName, pointLabel, aspectName, localeTag } from "./i18n.js";
 
 const form = document.querySelector("#chart-form");
 const resultsSection = document.querySelector("#results");
@@ -38,9 +39,16 @@ const manPredictionDaySummaryEl = document.querySelector("#man-prediction-day-su
 const manPredictionDayEl = document.querySelector("#man-prediction-day");
 const manPredictionWeekSummaryEl = document.querySelector("#man-prediction-week-summary");
 const manPredictionWeekEl = document.querySelector("#man-prediction-week");
+const womanCitySelect = document.querySelector("#woman-city");
+const manCitySelect = document.querySelector("#man-city");
+const womanNameInput = document.querySelector("#woman-name-input");
+const manNameInput = document.querySelector("#man-name-input");
 
 const THEME_STORAGE_KEY = "astrolove:theme";
 const themeToggleBtn = document.querySelector("#theme-toggle");
+const langToggleBtn = document.querySelector("#lang-toggle");
+
+let currentLang = getLang();
 
 initTheme();
 themeToggleBtn.addEventListener("click", () => {
@@ -68,11 +76,69 @@ function initTheme() {
   setTheme(theme);
 }
 
+langToggleBtn.addEventListener("click", () => {
+  applyLanguage(currentLang === "el" ? "en" : "el");
+  // Re-run the computation (if the form is already filled) so all generated
+  // text — sentences, sign names, etc. — switches language too.
+  tryCompute({ silent: true });
+});
+
+applyLanguage(currentLang);
+
+function applyLanguage(lang) {
+  currentLang = lang;
+  setLang(lang);
+  document.documentElement.lang = lang;
+  langToggleBtn.textContent = lang === "el" ? "EN" : "ΕΛ";
+  langToggleBtn.setAttribute("aria-label", ui(lang, "langToggleAria"));
+  themeToggleBtn.setAttribute("aria-label", ui(lang, "themeToggleAria"));
+  applyStaticText(lang);
+  populateCitySelect(womanCitySelect, lang);
+  populateCitySelect(manCitySelect, lang);
+}
+
+function applyStaticText(lang) {
+  setText("#tagline", ui(lang, "tagline"));
+  setText("#woman-title", ui(lang, "womanTitle"));
+  setText("#man-title", ui(lang, "manTitle"));
+  setText("#woman-name-label", ui(lang, "nameLabel"));
+  setText("#man-name-label", ui(lang, "nameLabel"));
+  womanNameInput.placeholder = ui(lang, "womanNamePlaceholder");
+  manNameInput.placeholder = ui(lang, "manNamePlaceholder");
+  setText("#woman-date-label", ui(lang, "dateLabel"));
+  setText("#man-date-label", ui(lang, "dateLabel"));
+  setText("#woman-time-label", ui(lang, "timeLabel"));
+  setText("#man-time-label", ui(lang, "timeLabel"));
+  setText("#woman-city-label", ui(lang, "cityLabel"));
+  setText("#man-city-label", ui(lang, "cityLabel"));
+  setText("#submit-btn", ui(lang, "submitButton"));
+  setText("#coord-hint", ui(lang, "coordHint"));
+  setText("#connections-heading", ui(lang, "connectionsHeading"));
+  setText("#reading-heading", ui(lang, "readingHeading"));
+  setText("#human-connection-heading", ui(lang, "humanConnectionHeading"));
+  setText("#love-relationship-heading", ui(lang, "loveRelationshipHeading"));
+  setText("#family-longterm-heading", ui(lang, "familyLongTermHeading"));
+  setText("#predictions-heading", ui(lang, "predictionsHeading"));
+  setText("#woman-today-label", ui(lang, "todayLabel"));
+  setText("#man-today-label", ui(lang, "todayLabel"));
+  setText("#woman-week-label", ui(lang, "thisWeekLabel"));
+  setText("#man-week-label", ui(lang, "thisWeekLabel"));
+
+  const womanName = womanNameInput.value.trim();
+  const manName = manNameInput.value.trim();
+  womanHeading.textContent = womanName ? ui(lang, "womanChartHeadingNamed")(womanName) : ui(lang, "womanChartHeadingDefault");
+  manHeading.textContent = manName ? ui(lang, "manChartHeadingNamed")(manName) : ui(lang, "manChartHeadingDefault");
+  womanPredictionHeading.textContent = womanName ? ui(lang, "womanForecastNamed")(womanName) : ui(lang, "womanForecastDefault");
+  manPredictionHeading.textContent = manName ? ui(lang, "manForecastNamed")(manName) : ui(lang, "manForecastDefault");
+}
+
+function setText(selector, text) {
+  const el = document.querySelector(selector);
+  if (el) el.textContent = text;
+}
+
 form.querySelectorAll('input[name$="-date"]').forEach(attachDateMask);
 form.querySelectorAll('input[name$="-time"]').forEach(attachTimeMask);
-
-populateCitySelect(document.querySelector("#woman-city"));
-populateCitySelect(document.querySelector("#man-city"));
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -90,14 +156,28 @@ function init() {
   }
 }
 
-function populateCitySelect(select) {
-  select.innerHTML = '<option value="" disabled selected>Choose a city…</option>';
-  for (const city of GREEK_CITIES) {
+function populateCitySelect(select, lang) {
+  const previousValue = select.value;
+  const sorted = [...GREEK_CITIES].sort((a, b) =>
+    cityDisplayName(a, lang).localeCompare(cityDisplayName(b, lang), localeTag(lang)),
+  );
+
+  select.innerHTML = "";
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.disabled = true;
+  placeholder.textContent = ui(lang, "cityPlaceholderOption");
+  select.appendChild(placeholder);
+
+  for (const city of sorted) {
     const option = document.createElement("option");
     option.value = city.name;
-    option.textContent = city.name;
+    option.textContent = cityDisplayName(city, lang);
     select.appendChild(option);
   }
+
+  select.value = previousValue || "";
+  if (!select.value) placeholder.selected = true;
 }
 
 function handleSubmit() {
@@ -112,6 +192,7 @@ function handleSubmit() {
 }
 
 function tryCompute({ silent }) {
+  const lang = currentLang;
   const data = new FormData(form);
 
   const woman = readPerson(data, "woman");
@@ -119,7 +200,7 @@ function tryCompute({ silent }) {
 
   if (!woman || !man) {
     if (!silent) {
-      alert("Please fill in a complete date (DD/MM/YYYY), time (HH:MM), and city of birth for both people.");
+      alert(ui(lang, "validationAlert"));
     }
     return false;
   }
@@ -130,39 +211,39 @@ function tryCompute({ silent }) {
   const womanPoints = extractPoints(womanChart);
   const manPoints = extractPoints(manChart);
 
-  womanHeading.textContent = woman.name ? `${woman.name}'s Chart` : "Woman's Chart";
-  manHeading.textContent = man.name ? `${man.name}'s Chart` : "Man's Chart";
+  womanHeading.textContent = woman.name ? ui(lang, "womanChartHeadingNamed")(woman.name) : ui(lang, "womanChartHeadingDefault");
+  manHeading.textContent = man.name ? ui(lang, "manChartHeadingNamed")(man.name) : ui(lang, "manChartHeadingDefault");
 
-  renderPoints(womanChartEl, womanPoints);
-  renderPoints(manChartEl, manPoints);
+  renderPoints(womanChartEl, womanPoints, lang);
+  renderPoints(manChartEl, manPoints, lang);
 
   womanWheelEl.innerHTML = "";
   womanWheelEl.appendChild(renderChartWheel(womanPoints, "woman"));
   manWheelEl.innerHTML = "";
   manWheelEl.appendChild(renderChartWheel(manPoints, "man"));
 
-  renderProfile(womanProfileEl, buildPersonalityProfile(womanPoints));
-  renderProfile(manProfileEl, buildPersonalityProfile(manPoints));
+  renderProfile(womanProfileEl, buildPersonalityProfile(womanPoints, lang), lang);
+  renderProfile(manProfileEl, buildPersonalityProfile(manPoints, lang), lang);
 
   const aspectMatches = computeSynastry(womanPoints, manPoints);
   const signMatches = sameSignMatches(womanPoints, manPoints);
-  renderConnections(aspectMatches, signMatches);
-  renderReading(aspectMatches, signMatches);
+  renderConnections(aspectMatches, signMatches, lang);
+  renderReading(aspectMatches, signMatches, lang);
 
-  womanPredictionHeading.textContent = woman.name ? `${woman.name}'s Forecast` : "Woman's Forecast";
-  manPredictionHeading.textContent = man.name ? `${man.name}'s Forecast` : "Man's Forecast";
-  renderPredictions(womanPoints, woman.location, womanPredictionDaySummaryEl, womanPredictionDayEl, womanPredictionWeekSummaryEl, womanPredictionWeekEl);
-  renderPredictions(manPoints, man.location, manPredictionDaySummaryEl, manPredictionDayEl, manPredictionWeekSummaryEl, manPredictionWeekEl);
+  womanPredictionHeading.textContent = woman.name ? ui(lang, "womanForecastNamed")(woman.name) : ui(lang, "womanForecastDefault");
+  manPredictionHeading.textContent = man.name ? ui(lang, "manForecastNamed")(man.name) : ui(lang, "manForecastDefault");
+  renderPredictions(womanPoints, woman.location, womanPredictionDaySummaryEl, womanPredictionDayEl, womanPredictionWeekSummaryEl, womanPredictionWeekEl, lang);
+  renderPredictions(manPoints, man.location, manPredictionDaySummaryEl, manPredictionDayEl, manPredictionWeekSummaryEl, manPredictionWeekEl, lang);
 
   return true;
 }
 
-function renderPredictions(natalPoints, location, daySummaryEl, dayListEl, weekSummaryEl, weekListEl) {
+function renderPredictions(natalPoints, location, daySummaryEl, dayListEl, weekSummaryEl, weekListEl, lang) {
   const dayMatches = computeDayTransits(natalPoints, location);
   const weekMatches = computeWeekTransits(natalPoints, location);
 
-  const dayPrediction = generateDayPrediction(dayMatches);
-  const weekPrediction = generateWeekPrediction(weekMatches);
+  const dayPrediction = generateDayPrediction(dayMatches, lang);
+  const weekPrediction = generateWeekPrediction(weekMatches, lang);
 
   daySummaryEl.textContent = dayPrediction.summary;
   renderPredictionList(dayListEl, dayPrediction.items);
@@ -210,29 +291,33 @@ function readPerson(formData, prefix) {
   };
 }
 
-function renderPoints(container, points) {
+function renderPoints(container, points, lang) {
   container.innerHTML = "";
   for (const point of points) {
     const row = document.createElement("div");
     row.className = "chart-point";
     row.innerHTML = `
       <span class="glyph">${point.glyph}</span>
-      <span class="label">${point.label}</span>
-      <span class="value">${point.signGlyph} ${capitalize(point.sign)} ${point.degree}</span>
-      ${point.retrograde ? '<span class="retro">R</span>' : ""}
+      <span class="label">${pointLabel(lang, point.key)}</span>
+      <span class="value">${point.signGlyph} ${signName(lang, point.sign)} ${point.degree}</span>
+      ${point.retrograde ? `<span class="retro">${ui(lang, "retro")}</span>` : ""}
     `;
     container.appendChild(row);
   }
 }
 
-function renderProfile(container, profile) {
+function renderProfile(container, profile, lang) {
   container.innerHTML = "";
   if (!profile.sunSign || !profile.ascendantSign) return;
+
+  const sunHeading = lang === "el" ? `Ήλιος σε ${signName(lang, profile.sunSign)}` : `Sun in ${signName(lang, profile.sunSign)}`;
+  const ascHeading =
+    lang === "el" ? `Ωροσκόπος σε ${signName(lang, profile.ascendantSign)}` : `Ascendant in ${signName(lang, profile.ascendantSign)}`;
 
   const sunCard = document.createElement("div");
   sunCard.className = "profile-card";
   sunCard.innerHTML = `
-    <h3>Sun in ${capitalize(profile.sunSign)}</h3>
+    <h3>${sunHeading}</h3>
     <p>${profile.sunText}</p>
   `;
   container.appendChild(sunCard);
@@ -240,17 +325,17 @@ function renderProfile(container, profile) {
   const ascCard = document.createElement("div");
   ascCard.className = "profile-card";
   ascCard.innerHTML = `
-    <h3>Ascendant in ${capitalize(profile.ascendantSign)}</h3>
+    <h3>${ascHeading}</h3>
     <p>${profile.ascendantText}</p>
   `;
   container.appendChild(ascCard);
 }
 
-function renderConnections(aspectMatches, signMatches) {
+function renderConnections(aspectMatches, signMatches, lang) {
   connectionsEl.innerHTML = "";
 
   if (aspectMatches.length === 0 && signMatches.length === 0) {
-    connectionsEl.innerHTML = '<p class="empty-connections">No close astrological connections found within standard orbs.</p>';
+    connectionsEl.innerHTML = `<p class="empty-connections">${ui(lang, "noConnections")}</p>`;
     return;
   }
 
@@ -259,10 +344,10 @@ function renderConnections(aspectMatches, signMatches) {
     card.className = `connection-card tone-${match.tone}`;
     card.innerHTML = `
       <div class="connection-points">
-        <span>${match.a.glyph} ${match.a.label}</span>
-        <span>${match.b.glyph} ${match.b.label}</span>
+        <span>${match.a.glyph} ${pointLabel(lang, match.a.key)}</span>
+        <span>${match.b.glyph} ${pointLabel(lang, match.b.key)}</span>
       </div>
-      <span class="aspect-name">${match.aspect}</span>
+      <span class="aspect-name">${aspectName(lang, match.aspect)}</span>
     `;
     connectionsEl.appendChild(card);
   }
@@ -276,25 +361,25 @@ function renderConnections(aspectMatches, signMatches) {
     card.className = "connection-card tone-harmonious";
     card.innerHTML = `
       <div class="connection-points">
-        <span>${match.a.glyph} ${match.a.label}</span>
-        <span>${match.b.glyph} ${match.b.label}</span>
+        <span>${match.a.glyph} ${pointLabel(lang, match.a.key)}</span>
+        <span>${match.b.glyph} ${pointLabel(lang, match.b.key)}</span>
       </div>
-      <span class="aspect-name">same sign · ${capitalize(match.a.sign)}</span>
+      <span class="aspect-name">${ui(lang, "sameSignLabel")} · ${signName(lang, match.a.sign)}</span>
     `;
     connectionsEl.appendChild(card);
   }
 }
 
-function renderReading(aspectMatches, signMatches) {
-  const reading = generateInterpretations(aspectMatches, signMatches);
+function renderReading(aspectMatches, signMatches, lang) {
+  const reading = generateInterpretations(aspectMatches, signMatches, lang);
 
   compatibilityPercentageEl.textContent = `${reading.compatibility.percentage}%`;
   compatibilityLabelEl.textContent = reading.compatibility.label;
   readingSummaryEl.textContent = reading.summary;
 
-  renderReadingList(readingConnectionEl, reading.connection, "No standout human-connection aspects — rapport here will be built deliberately rather than felt automatically.");
-  renderReadingList(readingLoveEl, reading.love, "No standout romantic aspects — attraction may need active cultivation rather than instant spark.");
-  renderReadingList(readingFamilyEl, reading.family, "No standout family/stability aspects — long-term commitment will take conscious work to build.");
+  renderReadingList(readingConnectionEl, reading.connection, ui(lang, "emptyConnectionMsg"));
+  renderReadingList(readingLoveEl, reading.love, ui(lang, "emptyLoveMsg"));
+  renderReadingList(readingFamilyEl, reading.family, ui(lang, "emptyFamilyMsg"));
 }
 
 function renderReadingList(container, items, emptyMessage) {
@@ -309,8 +394,4 @@ function renderReadingList(container, items, emptyMessage) {
     card.textContent = item.sentence;
     container.appendChild(card);
   }
-}
-
-function capitalize(s) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }

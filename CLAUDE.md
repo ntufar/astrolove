@@ -9,7 +9,7 @@ Greek birth city (chosen from a fixed dropdown list — see `src/greek-cities.js
 woman and a man; the page computes both natal charts, the astrological connections
 (aspects, same-sign matches) between them, and per-person daily/weekly transit
 predictions, entirely in the browser. There is no backend and no birth data ever leaves
-the client.
+the client. The UI is bilingual (Greek default, English toggle) — see `src/i18n.js`.
 
 ## Commands
 
@@ -24,6 +24,19 @@ There is no test suite or linter configured yet.
 
 ## Architecture
 
+- `src/i18n.js` — the single source of truth for all display strings. Exports
+  `getLang()`/`setLang(lang)` (persisted to `localStorage` under `astrolove:lang`,
+  defaulting to `"el"`), the `UI` dictionary of static chrome strings (`ui(lang, key)`),
+  and lookup dictionaries for zodiac sign names, planet/point labels, and aspect names
+  (`signName`/`pointLabel`/`aspectName`). Every other module that produces user-facing
+  text takes a `lang` ("el" | "en") argument instead of hardcoding English — see
+  `sign-meanings.js`, `interpretations.js`, `predictions.js`, `greek-cities.js`
+  (`cityDisplayName`), and `main.js`. `astro.js`/`transits.js`/`chart-wheel.js` stay
+  language-agnostic (they only deal in sign/point *keys* and glyphs, never display
+  strings) — translate at the point where a key becomes UI text, not in the math layer.
+  `main.js`'s `applyLanguage(lang)` swaps the toggle button, re-renders all static text,
+  repopulates (and re-sorts, via `localeCompare` with the right locale tag) the city
+  `<select>`s, and re-runs `tryCompute` so already-generated sentences switch language too.
 - `src/astro.js` — astrology domain logic, decoupled from the DOM:
   - `buildChart(origin)` wraps `circular-natal-horoscope-js`'s `Origin`/`Horoscope`
     classes. `Origin` takes 0-indexed months (`month - 1` conversion happens here) and
@@ -40,10 +53,14 @@ There is no test suite or linter configured yet.
     and returns matches sorted by exactness (closest to exact angle first).
   - `sameSignMatches(pointsA, pointsB)` is a simpler secondary connection type (same
     zodiac sign on both charts), rendered as a fallback/supplement to aspect matches.
-- `src/greek-cities.js` — the fixed `GREEK_CITIES` list (`{ name, latitude, longitude }`)
-  that backs both birth-city `<select>`s. Coordinates are looked up from here instead of
-  being typed in — there is no free-form lat/lon input anymore. Add a city by appending
-  an entry; keep it alphabetically sorted since it's rendered straight into the dropdown.
+- `src/greek-cities.js` — the fixed `GREEK_CITIES` list
+  (`{ name, nameEl, latitude, longitude }`) that backs both birth-city `<select>`s.
+  Coordinates are looked up from here instead of being typed in — there is no free-form
+  lat/lon input anymore. `name` (English) is the canonical identifier used as the
+  `<option>` value and the `localStorage` key, so it must stay stable across languages;
+  `nameEl` is only for display. `cityDisplayName(city, lang)` picks the right one; the
+  dropdown itself is sorted at render time in `main.js` (via `localeCompare`), not by
+  the array's own order, so cities don't need to be kept alphabetically sorted here.
 - `src/transits.js` — transit math: where the planets are *today* (or across the next 7
   days) relative to a natal chart. Reuses `buildChart`/`extractPoints`/`computeSynastry`
   from `astro.js` unchanged — `computeSynastry` is generic cross-chart aspect matching,
@@ -116,7 +133,9 @@ anywhere else — add a new token to all three blocks instead. `src/main.js`'s
 choice to `localStorage` (`astrolove:theme`); a small inline script in `index.html`'s
 `<head>` applies the stored theme before first paint to avoid a flash. The chart wheel's
 per-person glyph color is themed via CSS classes (`wheel-point-glyph--woman`/`--man` in
-`chart-wheel.js`/`style.css`), not an inline SVG `fill`, so it follows the theme too.
+`chart-wheel.js`/`style.css`), not an inline SVG `fill`, so it follows the theme too. The
+theme toggle and the language toggle (see `src/i18n.js`) sit together in the top-right
+`.toolbar`.
 
 ## Key library notes (`circular-natal-horoscope-js`)
 

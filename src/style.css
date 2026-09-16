@@ -91,15 +91,21 @@ body {
   padding: 2rem 1rem 4rem;
 }
 
-.theme-toggle {
+.toolbar {
   position: absolute;
   top: 0.5rem;
   right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.theme-toggle,
+.lang-toggle {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
   color: var(--text);
   border-radius: 999px;
-  width: 2.4rem;
   height: 2.4rem;
   font-size: 1.1rem;
   cursor: pointer;
@@ -108,7 +114,19 @@ body {
   justify-content: center;
 }
 
-.theme-toggle:hover {
+.theme-toggle {
+  width: 2.4rem;
+}
+
+.lang-toggle {
+  width: 2.8rem;
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 0.02em;
+}
+
+.theme-toggle:hover,
+.lang-toggle:hover {
   border-color: var(--gold);
 }
 

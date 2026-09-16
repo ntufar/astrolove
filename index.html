@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="el">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -18,76 +18,76 @@
   </head>
   <body>
     <div id="app">
-      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light/dark theme">🌙</button>
+      <div class="toolbar">
+        <button id="lang-toggle" class="lang-toggle" type="button">EN</button>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light/dark theme">🌙</button>
+      </div>
       <header class="app-header">
         <h1>AstroLove</h1>
-        <p class="tagline">Compare two birth charts and see where they connect.</p>
+        <p id="tagline" class="tagline"></p>
       </header>
 
       <form id="chart-form" class="chart-form">
         <div class="person-panel person-panel--woman">
-          <h2>Woman</h2>
+          <h2 id="woman-title"></h2>
           <label>
-            Name (optional)
-            <input type="text" name="woman-name" placeholder="Her name" />
+            <span id="woman-name-label" class="label-text"></span>
+            <input type="text" name="woman-name" id="woman-name-input" />
           </label>
           <label>
-            Date of birth (DD/MM/YYYY)
+            <span id="woman-date-label" class="label-text"></span>
             <input type="text" name="woman-date" inputmode="numeric" placeholder="15/06/1990" maxlength="10" required />
           </label>
           <label>
-            Time of birth (24h, HH:MM)
+            <span id="woman-time-label" class="label-text"></span>
             <input type="text" name="woman-time" inputmode="numeric" placeholder="14:30" maxlength="5" required />
           </label>
           <label>
-            City of birth
+            <span id="woman-city-label" class="label-text"></span>
             <select name="woman-city" id="woman-city" required></select>
           </label>
         </div>
 
         <div class="person-panel person-panel--man">
-          <h2>Man</h2>
+          <h2 id="man-title"></h2>
           <label>
-            Name (optional)
-            <input type="text" name="man-name" placeholder="His name" />
+            <span id="man-name-label" class="label-text"></span>
+            <input type="text" name="man-name" id="man-name-input" />
           </label>
           <label>
-            Date of birth (DD/MM/YYYY)
+            <span id="man-date-label" class="label-text"></span>
             <input type="text" name="man-date" inputmode="numeric" placeholder="02/03/1988" maxlength="10" required />
           </label>
           <label>
-            Time of birth (24h, HH:MM)
+            <span id="man-time-label" class="label-text"></span>
             <input type="text" name="man-time" inputmode="numeric" placeholder="09:00" maxlength="5" required />
           </label>
           <label>
-            City of birth
+            <span id="man-city-label" class="label-text"></span>
             <select name="man-city" id="man-city" required></select>
           </label>
         </div>
 
-        <button type="submit" class="submit-btn">Calculate charts &amp; connections</button>
+        <button type="submit" id="submit-btn" class="submit-btn"></button>
       </form>
 
-      <p class="coord-hint">
-        Birthplace is limited to Greek cities for now. This app performs all astrology
-        math locally in your browser, so no birth data ever leaves your device.
-      </p>
+      <p id="coord-hint" class="coord-hint"></p>
 
       <section id="results" class="results" hidden>
         <div class="chart-column chart-column--woman">
-          <h2 id="woman-heading">Woman's Chart</h2>
+          <h2 id="woman-heading"></h2>
           <div id="woman-wheel" class="wheel-container"></div>
           <div id="woman-profile" class="personality-profile"></div>
           <div id="woman-chart" class="chart-points"></div>
         </div>
 
         <div class="connections-column">
-          <h2>Connections</h2>
+          <h2 id="connections-heading"></h2>
           <div id="connections" class="connections-list"></div>
         </div>
 
         <div class="chart-column chart-column--man">
-          <h2 id="man-heading">Man's Chart</h2>
+          <h2 id="man-heading"></h2>
           <div id="man-wheel" class="wheel-container"></div>
           <div id="man-profile" class="personality-profile"></div>
           <div id="man-chart" class="chart-points"></div>
@@ -95,7 +95,7 @@
       </section>
 
       <section id="reading" class="reading" hidden>
-        <h2>Compatibility Reading</h2>
+        <h2 id="reading-heading"></h2>
 
         <div class="compatibility-badge">
           <span id="compatibility-percentage" class="compatibility-percentage">—</span>
@@ -106,46 +106,46 @@
 
         <div class="reading-grid">
           <div class="reading-block">
-            <h3>Human Connection</h3>
+            <h3 id="human-connection-heading"></h3>
             <div id="reading-connection" class="reading-list"></div>
           </div>
           <div class="reading-block">
-            <h3>Love &amp; Relationship</h3>
+            <h3 id="love-relationship-heading"></h3>
             <div id="reading-love" class="reading-list"></div>
           </div>
           <div class="reading-block">
-            <h3>Family &amp; Long-Term Life</h3>
+            <h3 id="family-longterm-heading"></h3>
             <div id="reading-family" class="reading-list"></div>
           </div>
         </div>
       </section>
 
       <section id="predictions" class="predictions" hidden>
-        <h2>Personal Predictions</h2>
+        <h2 id="predictions-heading"></h2>
         <div class="predictions-grid">
           <div class="prediction-column prediction-column--woman">
-            <h3 id="woman-prediction-heading">Woman's Forecast</h3>
+            <h3 id="woman-prediction-heading"></h3>
             <div class="prediction-block">
-              <h4>Today</h4>
+              <h4 id="woman-today-label"></h4>
               <p id="woman-prediction-day-summary" class="prediction-summary"></p>
               <div id="woman-prediction-day" class="prediction-list"></div>
             </div>
             <div class="prediction-block">
-              <h4>This Week</h4>
+              <h4 id="woman-week-label"></h4>
               <p id="woman-prediction-week-summary" class="prediction-summary"></p>
               <div id="woman-prediction-week" class="prediction-list"></div>
             </div>
           </div>
 
           <div class="prediction-column prediction-column--man">
-            <h3 id="man-prediction-heading">Man's Forecast</h3>
+            <h3 id="man-prediction-heading"></h3>
             <div class="prediction-block">
-              <h4>Today</h4>
+              <h4 id="man-today-label"></h4>
               <p id="man-prediction-day-summary" class="prediction-summary"></p>
               <div id="man-prediction-day" class="prediction-list"></div>
             </div>
             <div class="prediction-block">
-              <h4>This Week</h4>
+              <h4 id="man-week-label"></h4>
               <p id="man-prediction-week-summary" class="prediction-summary"></p>
               <div id="man-prediction-week" class="prediction-list"></div>
             </div>
