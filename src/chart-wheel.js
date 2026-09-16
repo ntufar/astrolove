@@ -21,7 +21,7 @@ const PLANET_BASE_R = 96;
 const PLANET_RING_STEP = 16;
 const INNER_R = 40;
 
-export function renderChartWheel(points, accentColor) {
+export function renderChartWheel(points, personKey) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("viewBox", `0 0 ${SIZE} ${SIZE}`);
   svg.setAttribute("class", "chart-wheel");
@@ -59,8 +59,7 @@ export function renderChartWheel(points, accentColor) {
     const marker = lineFromDegreeToRing(point.absoluteDegree, INNER_R, radius + 8);
     svg.appendChild(marker);
 
-    const label = text(pos.x, pos.y, point.glyph, "wheel-point-glyph");
-    label.setAttribute("fill", accentColor);
+    const label = text(pos.x, pos.y, point.glyph, `wheel-point-glyph wheel-point-glyph--${personKey}`);
     svg.appendChild(label);
   }
 

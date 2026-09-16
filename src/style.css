@@ -1,16 +1,76 @@
 :root {
   color-scheme: dark;
   --bg: #12101c;
+  --bg-gradient-start: #1e1a33;
   --panel-bg: #1c1830;
+  --surface-2: #0f0c1a;
   --panel-border: #362f57;
   --text: #f1eefc;
   --text-muted: #a89fc9;
   --woman-accent: #f2669e;
   --man-accent: #5aa9e6;
   --gold: #f4d35e;
+  --gold-contrast: #241c0a;
   --harmonious: #6fcf97;
   --challenging: #eb5757;
+  --row-tint: rgba(255, 255, 255, 0.03);
   font-family: "Georgia", "Iowan Old Style", serif;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg: #faf7f2;
+    --bg-gradient-start: #ffffff;
+    --panel-bg: #ffffff;
+    --surface-2: #f3eef7;
+    --panel-border: #ddd3ef;
+    --text: #241c33;
+    --text-muted: #6b6180;
+    --woman-accent: #c23b73;
+    --man-accent: #2f6fb0;
+    --gold: #a8710a;
+    --gold-contrast: #fffaf0;
+    --harmonious: #2f9e5c;
+    --challenging: #c53030;
+    --row-tint: rgba(0, 0, 0, 0.03);
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #faf7f2;
+  --bg-gradient-start: #ffffff;
+  --panel-bg: #ffffff;
+  --surface-2: #f3eef7;
+  --panel-border: #ddd3ef;
+  --text: #241c33;
+  --text-muted: #6b6180;
+  --woman-accent: #c23b73;
+  --man-accent: #2f6fb0;
+  --gold: #a8710a;
+  --gold-contrast: #fffaf0;
+  --harmonious: #2f9e5c;
+  --challenging: #c53030;
+  --row-tint: rgba(0, 0, 0, 0.03);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #12101c;
+  --bg-gradient-start: #1e1a33;
+  --panel-bg: #1c1830;
+  --surface-2: #0f0c1a;
+  --panel-border: #362f57;
+  --text: #f1eefc;
+  --text-muted: #a89fc9;
+  --woman-accent: #f2669e;
+  --man-accent: #5aa9e6;
+  --gold: #f4d35e;
+  --gold-contrast: #241c0a;
+  --harmonious: #6fcf97;
+  --challenging: #eb5757;
+  --row-tint: rgba(255, 255, 255, 0.03);
 }
 
 * {
@@ -19,15 +79,37 @@
 
 body {
   margin: 0;
-  background: radial-gradient(circle at top, #1e1a33, var(--bg) 70%);
+  background: radial-gradient(circle at top, var(--bg-gradient-start), var(--bg) 70%);
   color: var(--text);
   min-height: 100vh;
 }
 
 #app {
+  position: relative;
   max-width: 1100px;
   margin: 0 auto;
   padding: 2rem 1rem 4rem;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: 999px;
+  width: 2.4rem;
+  height: 2.4rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle:hover {
+  border-color: var(--gold);
 }
 
 .app-header {
@@ -92,7 +174,7 @@ label {
 }
 
 input {
-  background: #0f0c1a;
+  background: var(--surface-2);
   border: 1px solid var(--panel-border);
   border-radius: 8px;
   padding: 0.5rem 0.6rem;
@@ -130,7 +212,7 @@ input:focus {
 .submit-btn {
   grid-column: 1 / -1;
   background: var(--gold);
-  color: #241c0a;
+  color: var(--gold-contrast);
   border: none;
   border-radius: 10px;
   padding: 0.9rem;
@@ -204,7 +286,7 @@ input:focus {
 }
 
 .chart-point:nth-child(odd) {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--row-tint);
 }
 
 .chart-point .glyph {
@@ -299,7 +381,7 @@ input:focus {
 }
 
 .profile-card {
-  background: #0f0c1a;
+  background: var(--surface-2);
   border: 1px solid var(--panel-border);
   border-radius: 8px;
   padding: 0.6rem 0.75rem;
@@ -362,6 +444,14 @@ input:focus {
 .wheel-point-glyph {
   font-size: 13px;
   font-weight: bold;
+}
+
+.wheel-point-glyph--woman {
+  fill: var(--woman-accent);
+}
+
+.wheel-point-glyph--man {
+  fill: var(--man-accent);
 }
 
 .reading {
@@ -427,7 +517,7 @@ input:focus {
 }
 
 .reading-card {
-  background: #0f0c1a;
+  background: var(--surface-2);
   border: 1px solid var(--panel-border);
   border-left: 4px solid var(--harmonious);
   border-radius: 8px;

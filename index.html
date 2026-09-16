@@ -5,9 +5,20 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AstroLove — Compatibility Charts</title>
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("astrolove:theme");
+          if (stored === "light" || stored === "dark") {
+            document.documentElement.dataset.theme = stored;
+          }
+        } catch {}
+      })();
+    </script>
   </head>
   <body>
     <div id="app">
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light/dark theme">🌙</button>
       <header class="app-header">
         <h1>AstroLove</h1>
         <p class="tagline">Compare two birth charts and see where they connect.</p>

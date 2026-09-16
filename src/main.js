@@ -25,8 +25,34 @@ const readingConnectionEl = document.querySelector("#reading-connection");
 const readingLoveEl = document.querySelector("#reading-love");
 const readingFamilyEl = document.querySelector("#reading-family");
 
-const WOMAN_ACCENT = "#f2669e";
-const MAN_ACCENT = "#5aa9e6";
+const THEME_STORAGE_KEY = "astrolove:theme";
+const themeToggleBtn = document.querySelector("#theme-toggle");
+
+initTheme();
+themeToggleBtn.addEventListener("click", () => {
+  const current = document.documentElement.dataset.theme || (systemPrefersDark() ? "dark" : "light");
+  setTheme(current === "dark" ? "light" : "dark");
+});
+
+function systemPrefersDark() {
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? true;
+}
+
+function setTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  themeToggleBtn.textContent = theme === "dark" ? "🌙" : "☀️";
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch {
+    // Storage unavailable — theme choice just won't persist across visits.
+  }
+}
+
+function initTheme() {
+  const stored = document.documentElement.dataset.theme;
+  const theme = stored === "light" || stored === "dark" ? stored : systemPrefersDark() ? "dark" : "light";
+  setTheme(theme);
+}
 
 form.querySelectorAll('input[name$="-date"]').forEach(attachDateMask);
 form.querySelectorAll('input[name$="-time"]').forEach(attachTimeMask);
@@ -102,9 +128,9 @@ function tryCompute({ silent }) {
   renderPoints(manChartEl, manPoints);
 
   womanWheelEl.innerHTML = "";
-  womanWheelEl.appendChild(renderChartWheel(womanPoints, WOMAN_ACCENT));
+  womanWheelEl.appendChild(renderChartWheel(womanPoints, "woman"));
   manWheelEl.innerHTML = "";
-  manWheelEl.appendChild(renderChartWheel(manPoints, MAN_ACCENT));
+  manWheelEl.appendChild(renderChartWheel(manPoints, "man"));
 
   renderProfile(womanProfileEl, buildPersonalityProfile(womanPoints));
   renderProfile(manProfileEl, buildPersonalityProfile(manPoints));

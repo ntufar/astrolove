@@ -79,6 +79,19 @@ There is no test suite or linter configured yet.
   man) above a full-width "Compatibility Reading" section, with a woman/man accent
   color pair used consistently across form panels, chart columns, and wheel glyphs.
 
+## Theming
+
+All colors are CSS custom properties defined three times in `src/style.css`: once on
+bare `:root` (dark, the default), once under `@media (prefers-color-scheme: light)`
+guarded by `:root:not([data-theme="dark"])`, and once under `:root[data-theme="light"]`
+so a manual override always wins over the system preference. Do not hardcode a color
+anywhere else — add a new token to all three blocks instead. `src/main.js`'s
+`initTheme`/`setTheme` toggle `document.documentElement.dataset.theme` and persist the
+choice to `localStorage` (`astrolove:theme`); a small inline script in `index.html`'s
+`<head>` applies the stored theme before first paint to avoid a flash. The chart wheel's
+per-person glyph color is themed via CSS classes (`wheel-point-glyph--woman`/`--man` in
+`chart-wheel.js`/`style.css`), not an inline SVG `fill`, so it follows the theme too.
+
 ## Key library notes (`circular-natal-horoscope-js`)
 
 - Import from the package root: `import { Origin, Horoscope } from "circular-natal-horoscope-js"`.
