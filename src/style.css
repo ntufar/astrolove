@@ -277,7 +277,7 @@ select:focus {
 
 .chart-point {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.5rem;
   padding: 0.4rem 0.5rem;
   border-radius: 6px;
@@ -313,16 +313,26 @@ select:focus {
   font-weight: bold;
   text-align: right;
   line-height: 1.3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
+.chart-point .value .sign,
 .chart-point .value .deg {
   white-space: nowrap;
 }
 
+.chart-point .value .deg {
+  font-weight: normal;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  font-size: 0.85em;
+}
+
 .chart-point .retro {
-  flex: 0 0 auto;
   color: var(--challenging);
-  font-size: 0.75em;
+  font-size: 0.9em;
 }
 
 .connections-column h2 {

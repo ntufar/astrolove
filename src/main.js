@@ -300,8 +300,7 @@ function renderPoints(container, points, lang) {
     row.innerHTML = `
       <span class="${glyphClass}">${point.glyph}</span>
       <span class="label">${pointLabel(lang, point.key)}</span>
-      <span class="value">${point.signGlyph} ${signName(lang, point.sign)} <span class="deg">${point.degree}</span></span>
-      ${point.retrograde ? `<span class="retro">${ui(lang, "retro")}</span>` : ""}
+      <span class="value"><span class="sign">${point.signGlyph} ${signName(lang, point.sign)}</span><span class="deg">${point.degree}${point.retrograde ? ` <span class="retro">${ui(lang, "retro")}</span>` : ""}</span></span>
     `;
     container.appendChild(row);
   }
