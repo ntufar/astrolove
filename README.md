@@ -1,5 +1,7 @@
 # AstroLove
 
+Live site: https://ntufar.github.io/astrolove/
+
 A static, client-side web page that compares the birth charts (natal
 horoscopes) of a woman and a man side by side, and highlights the
 astrological connections (aspects and sign matches) between them.
