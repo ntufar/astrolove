@@ -289,21 +289,38 @@ select:focus {
 }
 
 .chart-point .glyph {
+  flex: 0 0 auto;
   width: 1.6em;
   text-align: center;
   color: var(--gold);
 }
 
+.chart-point .glyph--asc {
+  width: auto;
+  font-size: 0.75em;
+  font-weight: bold;
+}
+
 .chart-point .label {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   color: var(--text-muted);
 }
 
 .chart-point .value {
+  flex: 0 1 auto;
+  min-width: 0;
   font-weight: bold;
+  text-align: right;
+  line-height: 1.3;
+}
+
+.chart-point .value .deg {
+  white-space: nowrap;
 }
 
 .chart-point .retro {
+  flex: 0 0 auto;
   color: var(--challenging);
   font-size: 0.75em;
 }

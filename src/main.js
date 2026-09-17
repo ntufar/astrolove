@@ -296,10 +296,11 @@ function renderPoints(container, points, lang) {
   for (const point of points) {
     const row = document.createElement("div");
     row.className = "chart-point";
+    const glyphClass = point.key === "ascendant" ? "glyph glyph--asc" : "glyph";
     row.innerHTML = `
-      <span class="glyph">${point.glyph}</span>
+      <span class="${glyphClass}">${point.glyph}</span>
       <span class="label">${pointLabel(lang, point.key)}</span>
-      <span class="value">${point.signGlyph} ${signName(lang, point.sign)} ${point.degree}</span>
+      <span class="value">${point.signGlyph} ${signName(lang, point.sign)} <span class="deg">${point.degree}</span></span>
       ${point.retrograde ? `<span class="retro">${ui(lang, "retro")}</span>` : ""}
     `;
     container.appendChild(row);
