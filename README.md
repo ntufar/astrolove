@@ -1,5 +1,8 @@
 # AstroLove
 
+[![Deploy to GitHub Pages](https://github.com/ntufar/astrolove/actions/workflows/deploy.yml/badge.svg)](https://github.com/ntufar/astrolove/actions/workflows/deploy.yml)
+[![Live site](https://img.shields.io/badge/live-astrolove-blue)](https://ntufar.github.io/astrolove/)
+
 Live site: https://ntufar.github.io/astrolove/
 
 A static, client-side web page that compares the birth charts (natal
