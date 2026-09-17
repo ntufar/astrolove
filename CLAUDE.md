@@ -22,6 +22,15 @@ npm run preview   # serve the dist/ build locally to sanity-check a production b
 
 There is no test suite or linter configured yet.
 
+## Deploy
+
+Deploy after every code change: verify with `npm run build`, then commit the
+changed files (named explicitly, never a broad `git add`) and `git push origin
+master`. Pushing to `master` triggers `.github/workflows/deploy.yml`, which
+rebuilds `dist/` and publishes to https://ntufar.github.io/astrolove/ — no manual
+`dist/` handling needed (`dist/` is gitignored). This standing rule is the user's
+explicit authorization for the commit + push.
+
 ## Architecture
 
 - `src/i18n.js` — the single source of truth for all display strings. Exports
